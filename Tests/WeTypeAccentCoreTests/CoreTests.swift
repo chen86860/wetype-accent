@@ -46,6 +46,21 @@ import Testing
   }
 }
 
+@Test func acceptsSupportedWeTypeVersions() {
+  #expect(WeTypeCompatibility.supports("2.2.0"))
+  #expect(WeTypeCompatibility.supports("2.2"))
+  #expect(WeTypeCompatibility.supports("2.2.1"))
+  #expect(WeTypeCompatibility.supports("2.10.0"))
+  #expect(WeTypeCompatibility.supports("3.0.0"))
+}
+
+@Test func rejectsOldOrMalformedWeTypeVersions() {
+  #expect(!WeTypeCompatibility.supports("2.1.99"))
+  #expect(!WeTypeCompatibility.supports("1.99.99"))
+  #expect(!WeTypeCompatibility.supports("2.2.0-beta"))
+  #expect(!WeTypeCompatibility.supports("not-a-version"))
+}
+
 private func serialized(_ rgba: [UInt8]) -> Data {
   var result = Data()
   for component in rgba {

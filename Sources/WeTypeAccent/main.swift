@@ -5,7 +5,7 @@ import WeTypeAccentCore
 private let defaultAppPath = "/Library/Input Methods/WeType.app"
 private let supportPath = "/Library/Application Support/WeTypeAccent"
 private let statePath = supportPath + "/state.json"
-private let profile = WeTypeProfile.version220Build617
+private let knownVersion220Profile = WeTypeProfile.version220Build617
 
 private struct PatchState: Codable {
   let appPath: String
@@ -127,7 +127,7 @@ private func assetsURL(for appURL: URL) -> URL {
 }
 
 private func validateVersion(_ metadata: AppMetadata) throws {
-  guard metadata.shortVersion == profile.shortVersion, metadata.build == profile.build else {
+  guard WeTypeCompatibility.supports(metadata.shortVersion) else {
     throw AccentError.unsupportedVersion(version: metadata.shortVersion, build: metadata.build)
   }
 }
@@ -202,16 +202,16 @@ private func restartWeType(appPath: String) throws {
   throw AccentError.runtimeVerificationFailed
 }
 
-private func backupURL(metadata: AppMetadata) -> URL {
+private func backupURL(metadata: AppMetadata, sourceHash: String) -> URL {
   URL(fileURLWithPath: supportPath)
     .appendingPathComponent("Backups")
     .appendingPathComponent(
-      "\(metadata.shortVersion)-\(metadata.build)-\(profile.originalAssetsSHA256.prefix(12))"
+      "\(metadata.shortVersion)-\(metadata.build)-\(sourceHash.prefix(12))"
     )
     .appendingPathComponent("WeType.app")
 }
 
-private func validateBackup(_ backup: URL, metadata: AppMetadata) throws {
+private func validateBackup(_ backup: URL, metadata: AppMetadata, expectedHash: String) throws {
   let backupMetadata = try AppMetadata.load(from: backup)
   guard
     backupMetadata.shortVersion == metadata.shortVersion,
@@ -220,20 +220,17 @@ private func validateBackup(_ backup: URL, metadata: AppMetadata) throws {
     throw AccentError.invalidApplication(backup.path)
   }
   let hash = AssetPatcher.sha256(try Data(contentsOf: assetsURL(for: backup)))
-  guard hash == profile.originalAssetsSHA256 else {
-    throw AccentError.assetHashMismatch(expected: profile.originalAssetsSHA256, actual: hash)
+  guard hash == expectedHash else {
+    throw AccentError.assetHashMismatch(expected: expectedHash, actual: hash)
   }
   _ = try run("/usr/bin/codesign", ["--verify", "--deep", "--strict", "--verbose=2", backup.path])
 }
 
 private func ensureBackup(appURL: URL, metadata: AppMetadata, sourceHash: String) throws -> URL {
-  let destination = backupURL(metadata: metadata)
+  let destination = backupURL(metadata: metadata, sourceHash: sourceHash)
   if FileManager.default.fileExists(atPath: destination.path) {
-    try validateBackup(destination, metadata: metadata)
+    try validateBackup(destination, metadata: metadata, expectedHash: sourceHash)
     return destination
-  }
-  guard sourceHash == profile.originalAssetsSHA256 else {
-    throw AccentError.assetHashMismatch(expected: profile.originalAssetsSHA256, actual: sourceHash)
   }
   try FileManager.default.createDirectory(
     at: destination.deletingLastPathComponent(), withIntermediateDirectories: true)
@@ -241,21 +238,22 @@ private func ensureBackup(appURL: URL, metadata: AppMetadata, sourceHash: String
     .appendingPathComponent(".WeType.app.\(UUID().uuidString).tmp")
   defer { try? FileManager.default.removeItem(at: temporary) }
   _ = try run("/usr/bin/ditto", ["--noextattr", "--noqtn", appURL.path, temporary.path])
-  try validateBackup(temporary, metadata: metadata)
+  try validateBackup(temporary, metadata: metadata, expectedHash: sourceHash)
   try FileManager.default.moveItem(at: temporary, to: destination)
   return destination
 }
 
-private func restoreBackup(_ backupURL: URL, to appURL: URL, removeState: Bool) throws {
+private func restoreBackup(
+  _ backupURL: URL, to appURL: URL, expectedAssetsHash: String, removeState: Bool
+) throws {
   guard FileManager.default.fileExists(atPath: backupURL.path) else {
     throw AccentError.backupMissing(backupURL.path)
   }
   _ = try run("/usr/bin/ditto", ["--noextattr", "--noqtn", backupURL.path, appURL.path])
   _ = try run("/usr/bin/codesign", ["--verify", "--deep", "--strict", "--verbose=2", appURL.path])
   let restoredHash = AssetPatcher.sha256(try Data(contentsOf: assetsURL(for: appURL)))
-  guard restoredHash == profile.originalAssetsSHA256 else {
-    throw AccentError.assetHashMismatch(
-      expected: profile.originalAssetsSHA256, actual: restoredHash)
+  guard restoredHash == expectedAssetsHash else {
+    throw AccentError.assetHashMismatch(expected: expectedAssetsHash, actual: restoredHash)
   }
   try restartWeType(appPath: appURL.path)
   if removeState { try? FileManager.default.removeItem(atPath: statePath) }
@@ -275,13 +273,37 @@ private func apply(args: Arguments) throws {
 
   let liveAssets = try Data(contentsOf: assetsURL(for: appURL))
   let liveHash = AssetPatcher.sha256(liveAssets)
-  let backup = try ensureBackup(appURL: appURL, metadata: metadata, sourceHash: liveHash)
+  let appState = loadState().flatMap { state -> PatchState? in
+    guard
+      state.appPath == appURL.standardizedFileURL.path,
+      state.version == metadata.shortVersion,
+      state.build == metadata.build
+    else { return nil }
+    return state
+  }
+  let backup: URL
+  let expectedOriginalHash: String
+  if let appState {
+    guard
+      liveHash == appState.originalAssetsSHA256 || liveHash == appState.patchedAssetsSHA256
+    else {
+      throw AccentError.assetHashMismatch(
+        expected: "\(appState.originalAssetsSHA256) 或 \(appState.patchedAssetsSHA256)",
+        actual: liveHash
+      )
+    }
+    backup = URL(fileURLWithPath: appState.backupPath)
+    expectedOriginalHash = appState.originalAssetsSHA256
+    try validateBackup(backup, metadata: metadata, expectedHash: expectedOriginalHash)
+  } else {
+    backup = try ensureBackup(appURL: appURL, metadata: metadata, sourceHash: liveHash)
+    expectedOriginalHash = liveHash
+  }
   let originalAssetsURL = assetsURL(for: backup)
   let originalAssets = try Data(contentsOf: originalAssetsURL)
   let originalHash = AssetPatcher.sha256(originalAssets)
-  guard originalHash == profile.originalAssetsSHA256 else {
-    throw AccentError.assetHashMismatch(
-      expected: profile.originalAssetsSHA256, actual: originalHash)
+  guard originalHash == expectedOriginalHash else {
+    throw AccentError.assetHashMismatch(expected: expectedOriginalHash, actual: originalHash)
   }
 
   let patched = try AssetPatcher.patch(data: originalAssets, palette: selectedPalette)
@@ -318,7 +340,8 @@ private func apply(args: Arguments) throws {
     try writeState(state)
     try restartWeType(appPath: appURL.path)
   } catch {
-    try? restoreBackup(backup, to: appURL, removeState: false)
+    try? restoreBackup(
+      backup, to: appURL, expectedAssetsHash: originalHash, removeState: false)
     try? FileManager.default.removeItem(atPath: statePath)
     throw error
   }
@@ -331,14 +354,23 @@ private func restore(args: Arguments) throws {
   let metadata = try AppMetadata.load(from: appURL)
   try validateVersion(metadata)
   guard let state = loadState() else { throw AccentError.backupMissing(statePath) }
-  guard state.appPath == appURL.standardizedFileURL.path else {
-    throw AccentError.invalidApplication("状态记录属于另一份微信输入法：\(state.appPath)")
+  guard
+    state.appPath == appURL.standardizedFileURL.path,
+    state.version == metadata.shortVersion,
+    state.build == metadata.build
+  else {
+    throw AccentError.invalidApplication("状态记录属于另一份或另一版本的微信输入法")
   }
   guard confirm("将恢复腾讯原版微信输入法，继续吗？", yes: args.yes) else {
     print("已取消。")
     return
   }
-  try restoreBackup(URL(fileURLWithPath: state.backupPath), to: appURL, removeState: true)
+  try restoreBackup(
+    URL(fileURLWithPath: state.backupPath),
+    to: appURL,
+    expectedAssetsHash: state.originalAssetsSHA256,
+    removeState: true
+  )
   print("腾讯原版已恢复并重新启动。")
 }
 
@@ -349,16 +381,17 @@ private func status(args: Arguments) throws {
   let hash = AssetPatcher.sha256(assets)
   print("微信输入法：\(metadata.shortVersion)（\(metadata.build)）")
   print("资源 SHA-256：\(hash)")
-  if hash == profile.originalAssetsSHA256 {
-    print("状态：腾讯原版资源")
+  if hash == knownVersion220Profile.originalAssetsSHA256 {
+    print("状态：已验证的腾讯原版资源")
   } else if let state = loadState(), state.appPath == appURL.standardizedFileURL.path,
+    state.version == metadata.shortVersion, state.build == metadata.build,
     hash == state.patchedAssetsSHA256
   {
     print("状态：已由 WeType Accent 修改")
     print("颜色：\(state.light) / \(state.dark)")
     print("备份：\(state.backupPath)")
   } else {
-    print("状态：未知或由其他工具修改")
+    print("状态：未识别为 WeType Accent 补丁")
   }
   let pids = try weTypePIDs(userID: targetUserID(), appPath: appURL.path)
   print(pids.isEmpty ? "进程：当前用户未运行" : "进程：当前用户运行中（PID \(pids.sorted().first!)）")
@@ -366,7 +399,8 @@ private func status(args: Arguments) throws {
 
 private func doctor(args: Arguments) throws {
   let appURL = URL(fileURLWithPath: args.appPath)
-  _ = try AppMetadata.load(from: appURL)
+  let metadata = try AppMetadata.load(from: appURL)
+  try validateVersion(metadata)
   _ = try run("/usr/bin/xcrun", ["assetutil", "--validate-file", assetsURL(for: appURL).path])
   _ = try run("/usr/bin/codesign", ["--verify", "--deep", "--strict", "--verbose=2", appURL.path])
   try status(args: args)
@@ -386,7 +420,7 @@ private func help() {
       wetype-accent doctor
 
     高级颜色参数：--secondary '#409CFF' --background '#E8F2FF'
-    当前支持：微信输入法 2.2.0（617）
+    当前支持：微信输入法 >= 2.2.0
     """)
 }
 
@@ -399,7 +433,7 @@ do {
   case "status": try status(args: args)
   case "doctor": try doctor(args: args)
   case "help", "--help", "-h": help()
-  case "version", "--version": print("wetype-accent 0.1.0")
+  case "version", "--version": print("wetype-accent 0.1.1")
   default:
     help()
     exit(2)

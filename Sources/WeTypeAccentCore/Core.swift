@@ -78,7 +78,7 @@ public enum AccentError: LocalizedError, Equatable {
     case .invalidColor(let value):
       return "无效颜色“\(value)”，请使用 #RRGGBB 格式。"
     case .unsupportedVersion(let version, let build):
-      return "当前微信输入法 \(version)（\(build)）尚未验证，没有修改任何文件。"
+      return "当前微信输入法 \(version)（\(build)）低于最低支持版本 2.2.0，或版本号无法识别。没有修改任何文件。"
     case .assetHashMismatch(let expected, let actual):
       return "资源哈希不匹配。预期 \(expected)，实际 \(actual)。文件可能已被修改。"
     case .patchRecordMismatch(let name, let expected, let actual):
@@ -107,6 +107,32 @@ public struct WeTypeProfile: Sendable {
     build: "617",
     originalAssetsSHA256: "b4d474f0b9133fc314d1a12bee4cff2ce2e4a9563dcc6b2f4856b7ca26816a3b"
   )
+}
+
+public enum WeTypeCompatibility {
+  public static let minimumVersion = "2.2.0"
+
+  public static func supports(_ version: String) -> Bool {
+    guard let candidate = components(of: version), let minimum = components(of: minimumVersion)
+    else { return false }
+    let count = max(candidate.count, minimum.count)
+    for index in 0..<count {
+      let lhs = index < candidate.count ? candidate[index] : 0
+      let rhs = index < minimum.count ? minimum[index] : 0
+      if lhs != rhs { return lhs > rhs }
+    }
+    return true
+  }
+
+  private static func components(of version: String) -> [Int]? {
+    let parts = version.split(separator: ".", omittingEmptySubsequences: false)
+    guard !parts.isEmpty else { return nil }
+    let values = parts.compactMap { part -> Int? in
+      guard !part.isEmpty, part.allSatisfy(\.isNumber) else { return nil }
+      return Int(part)
+    }
+    return values.count == parts.count ? values : nil
+  }
 }
 
 public struct PatchRecord: Sendable {

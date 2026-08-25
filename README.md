@@ -20,9 +20,9 @@ Customize the candidate-window accent color of WeType (微信输入法) on macOS
 
 | WeType version | Build | Status |
 | --- | ---: | --- |
-| 2.2.0 | 617 | Verified |
+| >= 2.2.0 | Any | Accepted when the expected color records are present |
 
-Unknown versions and modified original resources are rejected without changing files.
+Versions older than 2.2.0 are rejected. Because later WeType releases may change their resource layout, the tool still requires every expected color record to occur exactly the known number of times and validates the patched catalog before touching the installed app.
 
 ## Install
 
@@ -83,7 +83,7 @@ Use `--yes` for non-interactive confirmation. Use `--app /path/to/WeType.app` to
 
 ## What it changes
 
-WeType 2.2.0 stores candidate-window named colors in:
+Supported WeType versions store candidate-window named colors in:
 
 ```text
 /Library/Input Methods/WeType.app/Contents/Resources/Assets.car
