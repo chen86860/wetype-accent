@@ -2,6 +2,9 @@
 
 自定义 macOS 微信输入法候选窗的重点色，让默认绿色变成系统蓝、紫色、粉色或任意你喜欢的颜色。可以通过 `npx` 一次性运行，也可以使用 npm 或 pnpm 全局安装。
 
+npm 包地址：[https://www.npmjs.com/package/wetype-accent](https://www.npmjs.com/package/wetype-accent)
+
+[![npm 版本](https://img.shields.io/npm/v/wetype-accent?label=npm)](https://www.npmjs.com/package/wetype-accent)
 [![最新版本](https://img.shields.io/github/v/release/chen86860/wetype-accent?label=最新版本)](https://github.com/chen86860/wetype-accent/releases/latest)
 [![构建状态](https://github.com/chen86860/wetype-accent/actions/workflows/ci.yml/badge.svg)](https://github.com/chen86860/wetype-accent/actions/workflows/ci.yml)
 [![许可证](https://img.shields.io/github/license/chen86860/wetype-accent?label=许可证)](LICENSE)
