@@ -1,0 +1,43 @@
+{
+  "name": "wetype-accent",
+  "version": "0.2.0",
+  "description": "在 macOS 上自定义微信输入法候选窗重点色，支持完整备份、自动回滚与一键恢复。",
+  "type": "module",
+  "bin": {
+    "wetype-accent": "bin/wetype-accent.mjs"
+  },
+  "files": [
+    "bin",
+    "LICENSE",
+    "README.md"
+  ],
+  "scripts": {
+    "check": "node --check bin/wetype-accent.mjs && node --test",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "os": [
+    "darwin"
+  ],
+  "keywords": [
+    "macos",
+    "wechat",
+    "wetype",
+    "input-method",
+    "cli"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/chen86860/wetype-accent.git"
+  },
+  "bugs": {
+    "url": "https://github.com/chen86860/wetype-accent/issues"
+  },
+  "homepage": "https://github.com/chen86860/wetype-accent#readme",
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  }
+}

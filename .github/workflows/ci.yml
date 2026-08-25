@@ -12,9 +12,13 @@ jobs:
     runs-on: macos-15
     steps:
       - uses: actions/checkout@v7
-      - name: Check formatting
-        run: swift format lint --strict --recursive Package.swift Sources Tests
-      - name: Test
-        run: swift test
-      - name: Build release
-        run: swift build -c release
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install
+        run: npm ci
+      - name: Check and test
+        run: npm run check
+      - name: Verify package contents
+        run: npm pack --dry-run

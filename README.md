@@ -1,17 +1,18 @@
 # WeType Accent
 
-在 macOS 上自定义微信输入法候选窗的重点色，让默认绿色变成系统蓝、紫色、粉色或任意你喜欢的颜色。
+通过一次 `npx` 命令自定义 macOS 微信输入法候选窗的重点色，让默认绿色变成系统蓝、紫色、粉色或任意你喜欢的颜色。
 
 [![最新版本](https://img.shields.io/github/v/release/chen86860/wetype-accent?label=最新版本)](https://github.com/chen86860/wetype-accent/releases/latest)
 [![构建状态](https://github.com/chen86860/wetype-accent/actions/workflows/ci.yml/badge.svg)](https://github.com/chen86860/wetype-accent/actions/workflows/ci.yml)
 [![许可证](https://img.shields.io/github/license/chen86860/wetype-accent?label=许可证)](LICENSE)
 
 > [!WARNING]
-> 这是非官方社区工具，与腾讯无关。应用补丁后，微信输入法原有的开发者签名会被替换为本机临时签名。更新微信输入法前，请先使用本工具恢复原版。
+> 这是非官方社区工具，与腾讯无关。请只从本仓库或正式 npm 包运行脚本。应用补丁后，微信输入法原有的开发者签名会被替换为本机临时签名；更新微信输入法前，请先使用本工具恢复原版。
 
 ## 功能
 
 - 支持任意 `#RRGGBB` 颜色
+- 通过 `npx` 临时运行，无需下载或全局安装 CLI
 - 自动生成深色模式、次级色和浅色背景
 - 支持分别指定每一种颜色
 - 修改前完整备份微信输入法
@@ -22,33 +23,32 @@
 
 ## 兼容性
 
-| 微信输入法版本 | macOS | 处理方式 |
-| --- | --- | --- |
-| `>= 2.2.0` | `>= 13` | 资源结构符合预期时允许修改 |
-| `< 2.2.0` | 任意 | 拒绝修改 |
+| 项目 | 要求 |
+| --- | --- |
+| 微信输入法 | `>= 2.2.0`，且资源结构符合预期 |
+| macOS | `>= 13` |
+| Node.js | `>= 18` |
 
 新版本微信输入法如果改变了资源结构，工具会在写入前停止，不会强行修改应用。
 
 ## 快速开始
 
-### 1. 安装
+### 1. 直接运行
 
-从 [Releases 页面](https://github.com/chen86860/wetype-accent/releases/latest) 下载名为 `wetype-accent` 的文件，然后在“终端”中执行：
+无需安装。打开“终端”，以 macOS 系统蓝 `#007AFF` 为例直接执行：
 
 ```sh
-cd ~/Downloads
-chmod +x wetype-accent
-sudo mv wetype-accent /usr/local/bin/
+npx --yes github:chen86860/wetype-accent#v0.2.0 --color '#007AFF'
 ```
 
-发布文件支持 Apple 芯片和 Intel Mac，但尚未经过 Apple 公证。如果 macOS 阻止运行，建议按照下方说明从源码构建。
+脚本会先显示配色和操作提示，确认后才通过系统 `sudo` 请求管理员权限。请勿使用 `sudo npx`。
 
 ### 2. 预览颜色
 
 以 macOS 系统蓝 `#007AFF` 为例：
 
 ```sh
-wetype-accent preview --color '#007AFF'
+npx --yes github:chen86860/wetype-accent#v0.2.0 preview --color '#007AFF'
 ```
 
 这一步只显示将要使用的配色，不会修改微信输入法。
@@ -56,7 +56,7 @@ wetype-accent preview --color '#007AFF'
 ### 3. 应用颜色
 
 ```sh
-sudo wetype-accent apply --color '#007AFF'
+npx --yes github:chen86860/wetype-accent#v0.2.0 apply --color '#007AFF'
 ```
 
 工具会先完整备份微信输入法，再修改资源、重新签名并重启输入法。
@@ -65,15 +65,15 @@ sudo wetype-accent apply --color '#007AFF'
 
 | 颜色 | 色值 | 命令 |
 | --- | --- | --- |
-| macOS 蓝 | `#007AFF` | `sudo wetype-accent apply --color '#007AFF'` |
-| 紫色 | `#BF5AF2` | `sudo wetype-accent apply --color '#BF5AF2'` |
-| 粉色 | `#FF375F` | `sudo wetype-accent apply --color '#FF375F'` |
-| 橙色 | `#FF9F0A` | `sudo wetype-accent apply --color '#FF9F0A'` |
+| macOS 蓝 | `#007AFF` | `--color '#007AFF'` |
+| 紫色 | `#BF5AF2` | `--color '#BF5AF2'` |
+| 粉色 | `#FF375F` | `--color '#FF375F'` |
+| 橙色 | `#FF9F0A` | `--color '#FF9F0A'` |
 
 需要完全控制深色模式和辅助颜色时，可以分别指定：
 
 ```sh
-sudo wetype-accent apply \
+npx --yes github:chen86860/wetype-accent#v0.2.0 apply \
   --color '#BF5AF2' \
   --dark '#CC7AFF' \
   --secondary '#CF86F7' \
@@ -85,32 +85,32 @@ sudo wetype-accent apply \
 查看当前状态：
 
 ```sh
-wetype-accent status
+npx --yes github:chen86860/wetype-accent#v0.2.0 status
 ```
 
 检查资源、代码签名和运行状态：
 
 ```sh
-wetype-accent doctor
+npx --yes github:chen86860/wetype-accent#v0.2.0 doctor
 ```
 
 恢复修改前的腾讯原版应用：
 
 ```sh
-sudo wetype-accent restore
+npx --yes github:chen86860/wetype-accent#v0.2.0 restore
 ```
 
-自动化调用时可以添加 `--yes` 跳过确认。使用 `--app /path/to/WeType.app` 可以检查另一份应用副本。
+自动化调用时可以添加 `--yes` 跳过确认。使用 `--app /path/to/WeType.app` 可以检查另一份应用副本。`npx` 只把脚本临时放入 npm 缓存，不会安装全局命令或后台组件。
 
-## 从源码构建
+## 从源码运行
 
-需要安装 Xcode Command Line Tools 或 Xcode：
+项目不依赖第三方 npm 包：
 
 ```sh
 git clone https://github.com/chen86860/wetype-accent.git
 cd wetype-accent
-swift build -c release
-sudo cp .build/release/wetype-accent /usr/local/bin/
+npm ci
+node bin/wetype-accent.mjs preview --color '#007AFF'
 ```
 
 ## 工作原理
@@ -145,7 +145,7 @@ B/255 → Float64 little-endian
 A/255 → Float64 little-endian
 ```
 
-工具会把原始颜色和目标颜色转换成相同的 32 字节格式，然后进行精确匹配和等长替换。只有每条规则的匹配数量与上表完全一致时才会继续；少一处或多一处都会停止，因此不会靠模糊搜索修改未知数据。
+Node 脚本使用 `Buffer.writeDoubleLE` 把原始颜色和目标颜色转换成相同的 32 字节格式，然后进行精确匹配和等长替换。只有每条规则的匹配数量与上表完全一致时才会继续；少一处或多一处都会停止，因此不会靠模糊搜索修改未知数据。
 
 如果只提供一个主颜色，其他颜色会自动生成：
 
@@ -216,7 +216,7 @@ codesign --force --deep --sign - \
 由于修改资源会改变应用签名，更新微信输入法前建议先运行：
 
 ```sh
-sudo wetype-accent restore
+npx --yes github:chen86860/wetype-accent#v0.2.0 restore
 ```
 
 然后通过官方安装程序更新，再重新应用颜色。如果新版本资源结构不兼容，工具会拒绝修改并显示错误。
@@ -224,16 +224,17 @@ sudo wetype-accent restore
 ## 安全与隐私
 
 - 所有操作均在本机完成，不会发送网络请求。
-- 只有 `apply` 和 `restore` 需要通过 `sudo` 获取管理员权限。
+- 脚本本身先以普通用户运行，只有 `apply` 和 `restore` 的写入阶段才会自行请求 `sudo`。
 - 不安装后台服务、守护进程或常驻的特权组件。
-- Release 由 GitHub Actions 构建，并提供 SHA-256 校验文件。
-- 发布文件使用临时签名，尚未经过 Apple 公证；介意时请从源码构建。
+- 不依赖第三方 npm 运行时包，发布包只包含单个 Node 脚本、README 和许可证。
+- GitHub Actions 会检查测试结果和 npm 包内容；请固定版本运行，不建议长期使用 `#main`。
 
 ## 开发与贡献
 
 ```sh
-swift test
-swift run wetype-accent preview --color '#007AFF'
+npm ci
+npm run check
+node bin/wetype-accent.mjs preview --color '#007AFF'
 ```
 
 欢迎提交 Issue 或 Pull Request。新增微信输入法版本兼容性时，请不要提交腾讯的 `Assets.car`、应用包或其他受版权保护的文件。

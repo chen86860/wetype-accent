@@ -1,9 +1,10 @@
+node_modules/
 .build/
 .swiftpm/
 .DS_Store
-DerivedData/
 *.app
 *.car
 *.zip
 *.tar.gz
+*.tgz
 Backups/

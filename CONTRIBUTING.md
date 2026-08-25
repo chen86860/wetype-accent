@@ -13,6 +13,7 @@
 提交 Pull Request 前请运行：
 
 ```sh
-swift test
-swift build -c release
+npm ci
+npm run check
+npm pack --dry-run
 ```
