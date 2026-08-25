@@ -1,16 +1,16 @@
-# Contributing
+# 参与贡献
 
-Contributions are welcome. Do not commit or attach Tencent application bundles, executables, `Assets.car` files, signatures, or backups.
+欢迎提交 Issue 和 Pull Request。请勿提交或附加腾讯的应用包、可执行文件、`Assets.car`、签名或备份。
 
-For a new WeType version, provide only:
+反馈新版本兼容性时，请只提供：
 
-- macOS version and architecture;
-- WeType marketing version and build number;
-- SHA-256 of the unmodified `Assets.car`;
-- names, original RGBA values, and expected record counts;
-- validation results from `assetutil`, `codesign`, process startup, and recent logs.
+- macOS 版本和芯片架构；
+- 微信输入法版本号和构建号；
+- 未修改 `Assets.car` 的 SHA-256；
+- 颜色名称、原始 RGBA 值及预期记录数量；
+- `assetutil`、`codesign`、进程启动和近期日志的验证结果。
 
-Run before opening a pull request:
+提交 Pull Request 前请运行：
 
 ```sh
 swift test

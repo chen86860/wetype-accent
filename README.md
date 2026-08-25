@@ -1,62 +1,76 @@
 # WeType Accent
 
-Customize the candidate-window accent color of WeType (微信输入法) on macOS.
+在 macOS 上自定义微信输入法候选窗的重点色，让默认绿色变成系统蓝、紫色、粉色或任意你喜欢的颜色。
+
+[![最新版本](https://img.shields.io/github/v/release/chen86860/wetype-accent?label=最新版本)](https://github.com/chen86860/wetype-accent/releases/latest)
+[![构建状态](https://github.com/chen86860/wetype-accent/actions/workflows/ci.yml/badge.svg)](https://github.com/chen86860/wetype-accent/actions/workflows/ci.yml)
+[![许可证](https://img.shields.io/github/license/chen86860/wetype-accent?label=许可证)](LICENSE)
 
 > [!WARNING]
-> This is an unofficial community tool. It is not affiliated with or endorsed by Tencent. Applying a patch replaces WeType's Developer ID signature with a local ad-hoc signature. Restore the original app before updating WeType.
+> 这是非官方社区工具，与腾讯无关。应用补丁后，微信输入法原有的开发者签名会被替换为本机临时签名。更新微信输入法前，请先使用本工具恢复原版。
 
-## Features
+## 功能
 
-- Any `#RRGGBB` accent color
-- Automatic light, dark, secondary, and background variants
-- Optional explicit colors for every variant
-- Strict version and SHA-256 checks
-- Full application backup before the first modification
-- Automatic rollback when validation, signing, or restart fails
-- `status`, `doctor`, and `restore` commands
-- No Tencent application, binary, or asset files are distributed
+- 支持任意 `#RRGGBB` 颜色
+- 自动生成深色模式、次级色和浅色背景
+- 支持分别指定每一种颜色
+- 修改前完整备份微信输入法
+- 严格校验颜色记录和资源文件
+- 修改、签名或重启失败时自动回滚
+- 支持状态检查、故障诊断和一键恢复
+- 不分发腾讯的应用、二进制文件或资源文件
 
-## Compatibility
+## 兼容性
 
-| WeType version | Build | Status |
-| --- | ---: | --- |
-| >= 2.2.0 | Any | Accepted when the expected color records are present |
+| 微信输入法版本 | macOS | 处理方式 |
+| --- | --- | --- |
+| `>= 2.2.0` | `>= 13` | 资源结构符合预期时允许修改 |
+| `< 2.2.0` | 任意 | 拒绝修改 |
 
-Versions older than 2.2.0 are rejected. Because later WeType releases may change their resource layout, the tool still requires every expected color record to occur exactly the known number of times and validates the patched catalog before touching the installed app.
+新版本微信输入法如果改变了资源结构，工具会在写入前停止，不会强行修改应用。
 
-## Install
+## 快速开始
 
-Download the `wetype-accent` universal binary from [GitHub Releases](../../releases), make it executable, and move it somewhere on your `PATH`:
+### 1. 安装
+
+从 [Releases 页面](https://github.com/chen86860/wetype-accent/releases/latest) 下载名为 `wetype-accent` 的文件，然后在“终端”中执行：
 
 ```sh
+cd ~/Downloads
 chmod +x wetype-accent
 sudo mv wetype-accent /usr/local/bin/
 ```
 
-Release binaries are ad-hoc signed but not Apple-notarized. macOS may ask you to confirm opening the downloaded executable. If you do not want to approve an unnotarized binary, build it from the auditable source instead.
+发布文件支持 Apple 芯片和 Intel Mac，但尚未经过 Apple 公证。如果 macOS 阻止运行，建议按照下方说明从源码构建。
 
-Or build from source:
+### 2. 预览颜色
 
-```sh
-swift build -c release
-cp .build/release/wetype-accent ./wetype-accent
-```
-
-## Usage
-
-Preview an automatically derived palette:
+以 macOS 系统蓝 `#007AFF` 为例：
 
 ```sh
 wetype-accent preview --color '#007AFF'
 ```
 
-Apply it:
+这一步只显示将要使用的配色，不会修改微信输入法。
+
+### 3. 应用颜色
 
 ```sh
 sudo wetype-accent apply --color '#007AFF'
 ```
 
-Override individual variants:
+工具会先完整备份微信输入法，再修改资源、重新签名并重启输入法。
+
+## 常用颜色
+
+| 颜色 | 色值 | 命令 |
+| --- | --- | --- |
+| macOS 蓝 | `#007AFF` | `sudo wetype-accent apply --color '#007AFF'` |
+| 紫色 | `#BF5AF2` | `sudo wetype-accent apply --color '#BF5AF2'` |
+| 粉色 | `#FF375F` | `sudo wetype-accent apply --color '#FF375F'` |
+| 橙色 | `#FF9F0A` | `sudo wetype-accent apply --color '#FF9F0A'` |
+
+需要完全控制深色模式和辅助颜色时，可以分别指定：
 
 ```sh
 sudo wetype-accent apply \
@@ -66,67 +80,91 @@ sudo wetype-accent apply \
   --background '#F7EEFC'
 ```
 
-Inspect or diagnose the current installation:
+## 检查与恢复
+
+查看当前状态：
 
 ```sh
 wetype-accent status
+```
+
+检查资源、代码签名和运行状态：
+
+```sh
 wetype-accent doctor
 ```
 
-Restore the exact Tencent-signed backup:
+恢复修改前的腾讯原版应用：
 
 ```sh
 sudo wetype-accent restore
 ```
 
-Use `--yes` for non-interactive confirmation. Use `--app /path/to/WeType.app` to inspect or test another copy.
+自动化调用时可以添加 `--yes` 跳过确认。使用 `--app /path/to/WeType.app` 可以检查另一份应用副本。
 
-## What it changes
+## 从源码构建
 
-Supported WeType versions store candidate-window named colors in:
+需要安装 Xcode Command Line Tools 或 Xcode：
+
+```sh
+git clone https://github.com/chen86860/wetype-accent.git
+cd wetype-accent
+swift build -c release
+sudo cp .build/release/wetype-accent /usr/local/bin/
+```
+
+## 工作原理
+
+候选窗颜色保存在微信输入法的 CoreUI 资源目录中：
 
 ```text
 /Library/Input Methods/WeType.app/Contents/Resources/Assets.car
 ```
 
-The tool patches only six verified serialized CoreUI color records for `bc16`, `bg02`, `bg03`, and `bg04`. It validates the resulting catalog with Apple's `assetutil`, then consistently ad-hoc signs the application and its embedded code:
+工具只替换经过验证的 `bc16`、`bg02`、`bg03` 和 `bg04` 颜色记录。写入前后会执行以下保护：
 
-```sh
-codesign --force --deep --sign - \
-  --preserve-metadata=identifier,entitlements \
-  "/Library/Input Methods/WeType.app"
-```
+1. 检查微信输入法版本和颜色记录数量。
+2. 完整备份原始 `.app`，并记录原始资源的 SHA-256。
+3. 使用 Apple `assetutil` 验证生成的资源目录。
+4. 对应用及其内嵌代码进行一致的临时签名。
+5. 重启微信输入法并确认新进程正常运行。
+6. 任一步骤失败时自动恢复备份。
 
-It does not modify the Flutter AOT settings-window gradient.
+本工具不会修改微信输入法设置窗口中的 Flutter 绿色渐变。
 
-## Backup and update behavior
+## 备份与更新
 
-The first patch stores a complete original bundle under:
+首次修改时，完整备份保存在：
 
 ```text
 /Library/Application Support/WeTypeAccent/Backups/
 ```
 
-This is intentionally a full backup because deep signing changes embedded code signatures. Updating WeType may overwrite the patch or reject the modified installation. Restore first, update through the official installer, and wait for a compatible WeType Accent profile before reapplying.
+由于修改资源会改变应用签名，更新微信输入法前建议先运行：
 
-## Security and privacy
+```sh
+sudo wetype-accent restore
+```
 
-- All operations are local.
-- The tool performs no network requests.
-- Administrator access is requested only by running `apply` or `restore` with `sudo`.
-- No background helper, daemon, or persistent privileged component is installed.
-- Release builds are produced by GitHub Actions; SHA-256 checksums are attached to each release.
-- Release binaries are built for Apple Silicon and Intel, but are not Apple-notarized.
+然后通过官方安装程序更新，再重新应用颜色。如果新版本资源结构不兼容，工具会拒绝修改并显示错误。
 
-## Development
+## 安全与隐私
+
+- 所有操作均在本机完成，不会发送网络请求。
+- 只有 `apply` 和 `restore` 需要通过 `sudo` 获取管理员权限。
+- 不安装后台服务、守护进程或常驻的特权组件。
+- Release 由 GitHub Actions 构建，并提供 SHA-256 校验文件。
+- 发布文件使用临时签名，尚未经过 Apple 公证；介意时请从源码构建。
+
+## 开发与贡献
 
 ```sh
 swift test
 swift run wetype-accent preview --color '#007AFF'
 ```
 
-The release artifact is one executable file. Source code is split into a small core module and CLI entry point so the binary patch logic can be tested independently.
+欢迎提交 Issue 或 Pull Request。新增微信输入法版本兼容性时，请不要提交腾讯的 `Assets.car`、应用包或其他受版权保护的文件。
 
-## License
+## 许可证
 
-MIT. “WeType” and “微信输入法” are trademarks of their respective owner.
+项目采用 [MIT License](LICENSE)。“WeType”和“微信输入法”是其各自所有者的商标。

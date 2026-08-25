@@ -1,13 +1,14 @@
-# Security Policy
+# 安全策略
 
-Please report vulnerabilities through GitHub private vulnerability reporting rather than a public issue.
+请通过 GitHub 的私密漏洞报告功能提交安全问题，不要创建公开 Issue。
 
-The patcher intentionally modifies and ad-hoc signs an installed input method. Its safeguards are part of the security boundary:
+本工具会修改已安装的输入法并进行临时签名，因此以下保护措施属于安全边界：
 
-- exact supported version and original `Assets.car` SHA-256;
-- exact expected occurrence counts for every serialized color record;
-- a complete Tencent-signed backup;
-- CoreUI catalog and deep code-signature validation;
-- automatic rollback if signing or runtime verification fails.
+- 拒绝低于 2.2.0 或格式异常的版本号；
+- 为每个安装版本单独记录并校验原始 `Assets.car` 的 SHA-256；
+- 严格检查每项序列化颜色记录的出现次数；
+- 保留完整的腾讯签名原版备份；
+- 验证 CoreUI 资源目录和完整代码签名；
+- 签名或运行验证失败时自动回滚。
 
-Do not weaken these checks to support a new WeType release. Add and test a new version profile instead.
+请勿为了兼容微信输入法新版本而削弱这些检查。资源结构发生变化时，应补充相应实现和测试。

@@ -1,14 +1,14 @@
-# Changelog
+# 更新记录
 
 ## 0.1.1 — 2026-08-25
 
-- Accept WeType versions greater than or equal to 2.2.0.
-- Derive and verify the original-resource hash per installed version while retaining strict color-record and CoreUI catalog validation.
+- 支持 2.2.0 及更高版本的微信输入法。
+- 按安装版本记录并验证原始资源哈希，同时保留严格的颜色记录和 CoreUI 资源校验。
 
 ## 0.1.0 — 2026-08-25
 
-- Add configurable accent, dark, secondary, and background colors.
-- Support verified WeType 2.2.0 build 617 resources.
-- Add strict resource hashing and CoreUI catalog validation.
-- Add full-bundle backups, automatic rollback, status, diagnostics, and restore.
-- Build a universal macOS executable for GitHub Releases.
+- 支持自定义重点色、深色模式、次级色和背景色。
+- 支持经过验证的微信输入法 2.2.0（617）资源。
+- 增加严格的资源哈希和 CoreUI 资源校验。
+- 增加完整应用备份、自动回滚、状态检查、诊断和恢复。
+- 为 GitHub Releases 构建 macOS 通用可执行文件。
