@@ -26,7 +26,7 @@ Unknown versions and modified original resources are rejected without changing f
 
 ## Install
 
-Download and unzip the universal binary from [GitHub Releases](../../releases), make it executable, and move it somewhere on your `PATH`:
+Download the `wetype-accent` universal binary from [GitHub Releases](../../releases), make it executable, and move it somewhere on your `PATH`:
 
 ```sh
 chmod +x wetype-accent
