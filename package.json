@@ -1,6 +1,6 @@
 {
   "name": "wetype-accent",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "description": "自定义 macOS 微信输入法候选窗重点色，支持 npx 一次性运行及 npm、pnpm 全局安装。",
   "type": "module",
   "bin": {

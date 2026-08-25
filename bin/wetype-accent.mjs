@@ -9,7 +9,7 @@ import process from "node:process";
 import readline from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 
-const VERSION = "0.2.1";
+const VERSION = "0.2.2";
 const MINIMUM_WETYPE_VERSION = "2.2.0";
 const DEFAULT_APP_PATH = "/Library/Input Methods/WeType.app";
 const SUPPORT_PATH = "/Library/Application Support/WeTypeAccent";
