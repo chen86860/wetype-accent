@@ -1,6 +1,6 @@
 # WeType Accent
 
-通过一次 `npx` 命令自定义 macOS 微信输入法候选窗的重点色，让默认绿色变成系统蓝、紫色、粉色或任意你喜欢的颜色。
+自定义 macOS 微信输入法候选窗的重点色，让默认绿色变成系统蓝、紫色、粉色或任意你喜欢的颜色。可以通过 `npx` 一次性运行，也可以使用 npm 或 pnpm 全局安装。
 
 [![最新版本](https://img.shields.io/github/v/release/chen86860/wetype-accent?label=最新版本)](https://github.com/chen86860/wetype-accent/releases/latest)
 [![构建状态](https://github.com/chen86860/wetype-accent/actions/workflows/ci.yml/badge.svg)](https://github.com/chen86860/wetype-accent/actions/workflows/ci.yml)
@@ -12,7 +12,7 @@
 ## 功能
 
 - 支持任意 `#RRGGBB` 颜色
-- 通过 `npx` 临时运行，无需下载或全局安装 CLI
+- 支持 `npx` 一次性运行，以及 npm、pnpm 全局安装
 - 自动生成深色模式、次级色和浅色背景
 - 支持分别指定每一种颜色
 - 修改前完整备份微信输入法
@@ -33,33 +33,63 @@
 
 ## 快速开始
 
-### 1. 直接运行
+### 方式一：npx 一次性运行
 
-无需安装。打开“终端”，以 macOS 系统蓝 `#007AFF` 为例直接执行：
+适合只修改一次颜色的用户。无需全局安装，打开“终端”直接执行：
 
 ```sh
-npx --yes wetype-accent@0.2.0 --color '#007AFF'
+npx wetype-accent --color '#007AFF'
 ```
 
-脚本会先显示配色和操作提示，确认后才通过系统 `sudo` 请求管理员权限。请勿使用 `sudo npx`。
+首次运行时 npx 可能询问是否临时下载该包。脚本会先显示配色和操作提示，确认后才通过系统 `sudo` 请求管理员权限。请勿使用 `sudo npx`。
 
-### 2. 预览颜色
+如果想固定使用某个版本：
+
+```sh
+npx wetype-accent@0.2.1 --color '#007AFF'
+```
+
+### 方式二：全局安装
+
+适合需要反复更换颜色、检查状态或恢复备份的用户。
+
+使用 npm：
+
+```sh
+npm install --global wetype-accent
+```
+
+或者使用 pnpm：
+
+```sh
+pnpm add --global wetype-accent
+```
+
+安装后可以直接运行：
+
+```sh
+wetype-accent --color '#007AFF'
+```
+
+### 预览和应用
 
 以 macOS 系统蓝 `#007AFF` 为例：
 
 ```sh
-npx --yes wetype-accent@0.2.0 preview --color '#007AFF'
+wetype-accent preview --color '#007AFF'
 ```
 
 这一步只显示将要使用的配色，不会修改微信输入法。
 
-### 3. 应用颜色
+确认后应用颜色：
 
 ```sh
-npx --yes wetype-accent@0.2.0 apply --color '#007AFF'
+wetype-accent apply --color '#007AFF'
 ```
 
 工具会先完整备份微信输入法，再修改资源、重新签名并重启输入法。
+
+下文使用全局安装后的 `wetype-accent` 命令；如果没有全局安装，在命令前加上 `npx` 即可，例如 `npx wetype-accent status`。
 
 ## 常用颜色
 
@@ -73,7 +103,7 @@ npx --yes wetype-accent@0.2.0 apply --color '#007AFF'
 需要完全控制深色模式和辅助颜色时，可以分别指定：
 
 ```sh
-npx --yes wetype-accent@0.2.0 apply \
+wetype-accent apply \
   --color '#BF5AF2' \
   --dark '#CC7AFF' \
   --secondary '#CF86F7' \
@@ -85,22 +115,22 @@ npx --yes wetype-accent@0.2.0 apply \
 查看当前状态：
 
 ```sh
-npx --yes wetype-accent@0.2.0 status
+wetype-accent status
 ```
 
 检查资源、代码签名和运行状态：
 
 ```sh
-npx --yes wetype-accent@0.2.0 doctor
+wetype-accent doctor
 ```
 
 恢复修改前的腾讯原版应用：
 
 ```sh
-npx --yes wetype-accent@0.2.0 restore
+wetype-accent restore
 ```
 
-自动化调用时可以添加 `--yes` 跳过确认。使用 `--app /path/to/WeType.app` 可以检查另一份应用副本。`npx` 只把脚本临时放入 npm 缓存，不会安装全局命令或后台组件。
+自动化调用时可以添加 CLI 参数 `--yes` 跳过工具自身的操作确认。使用 `--app /path/to/WeType.app` 可以检查另一份应用副本。`npx` 只把脚本临时放入 npm 缓存，不会安装全局命令或后台组件。
 
 ## 从源码运行
 
@@ -216,7 +246,7 @@ codesign --force --deep --sign - \
 由于修改资源会改变应用签名，更新微信输入法前建议先运行：
 
 ```sh
-npx --yes wetype-accent@0.2.0 restore
+wetype-accent restore
 ```
 
 然后通过官方安装程序更新，再重新应用颜色。如果新版本资源结构不兼容，工具会拒绝修改并显示错误。
@@ -227,7 +257,7 @@ npx --yes wetype-accent@0.2.0 restore
 - 脚本本身先以普通用户运行，只有 `apply` 和 `restore` 的写入阶段才会自行请求 `sudo`。
 - 不安装后台服务、守护进程或常驻的特权组件。
 - 不依赖第三方 npm 运行时包，发布包只包含单个 Node 脚本、README 和许可证。
-- GitHub Actions 会检查测试结果和 npm 包内容；请固定版本运行，不建议长期使用 `#main`。
+- GitHub Actions 会检查测试结果和 npm 包内容；对版本可重复性有要求时，可以在 npx 命令中指定确切版本。
 
 ## 开发与贡献
 

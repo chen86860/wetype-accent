@@ -9,7 +9,7 @@ import process from "node:process";
 import readline from "node:readline/promises";
 import { fileURLToPath } from "node:url";
 
-const VERSION = "0.2.0";
+const VERSION = "0.2.1";
 const MINIMUM_WETYPE_VERSION = "2.2.0";
 const DEFAULT_APP_PATH = "/Library/Input Methods/WeType.app";
 const SUPPORT_PATH = "/Library/Application Support/WeTypeAccent";
@@ -580,6 +580,10 @@ function help() {
   npx wetype-accent status
   npx wetype-accent restore
   npx wetype-accent doctor
+
+全局安装：
+  npm install --global wetype-accent
+  pnpm add --global wetype-accent
 
 高级颜色参数：--dark '#0A84FF' --secondary '#409CFF' --background '#E8F2FF'
 当前支持：微信输入法 >= ${MINIMUM_WETYPE_VERSION}
