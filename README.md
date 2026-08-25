@@ -1,12 +1,12 @@
+![WeType Accent：让微信输入法换上 macOS 蓝](https://raw.githubusercontent.com/chen86860/wetype-accent/main/assets/wetype-accent-blue-demo.webp)
+
 # WeType Accent
 
-自定义 macOS 微信输入法候选窗的重点色，让默认绿色变成系统蓝、紫色、粉色或任意你喜欢的颜色。可以通过 `npx` 一次性运行，也可以使用 npm 或 pnpm 全局安装。
+一条命令，让 macOS 微信输入法换上系统蓝或任意喜欢的颜色。无需长期安装，随时预览、应用和恢复。
 
 [![npm 版本](https://img.shields.io/npm/v/wetype-accent?label=npm)](https://www.npmjs.com/package/wetype-accent)
 [![构建状态](https://github.com/chen86860/wetype-accent/actions/workflows/ci.yml/badge.svg)](https://github.com/chen86860/wetype-accent/actions/workflows/ci.yml)
 [![许可证](https://img.shields.io/github/license/chen86860/wetype-accent?label=许可证)](LICENSE)
-
-![微信输入法重点色改为 macOS 蓝色后的效果](https://raw.githubusercontent.com/chen86860/wetype-accent/main/assets/wetype-accent-blue-demo.webp)
 
 > [!WARNING]
 > 这是非官方社区工具，与腾讯无关。请只从本仓库或正式 npm 包运行脚本。应用补丁后，微信输入法原有的开发者签名会被替换为本机临时签名；更新微信输入法前，请先使用本工具恢复原版。
