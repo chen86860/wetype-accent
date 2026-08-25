@@ -38,7 +38,7 @@
 无需安装。打开“终端”，以 macOS 系统蓝 `#007AFF` 为例直接执行：
 
 ```sh
-npx --yes github:chen86860/wetype-accent#v0.2.0 --color '#007AFF'
+npx --yes wetype-accent@0.2.0 --color '#007AFF'
 ```
 
 脚本会先显示配色和操作提示，确认后才通过系统 `sudo` 请求管理员权限。请勿使用 `sudo npx`。
@@ -48,7 +48,7 @@ npx --yes github:chen86860/wetype-accent#v0.2.0 --color '#007AFF'
 以 macOS 系统蓝 `#007AFF` 为例：
 
 ```sh
-npx --yes github:chen86860/wetype-accent#v0.2.0 preview --color '#007AFF'
+npx --yes wetype-accent@0.2.0 preview --color '#007AFF'
 ```
 
 这一步只显示将要使用的配色，不会修改微信输入法。
@@ -56,7 +56,7 @@ npx --yes github:chen86860/wetype-accent#v0.2.0 preview --color '#007AFF'
 ### 3. 应用颜色
 
 ```sh
-npx --yes github:chen86860/wetype-accent#v0.2.0 apply --color '#007AFF'
+npx --yes wetype-accent@0.2.0 apply --color '#007AFF'
 ```
 
 工具会先完整备份微信输入法，再修改资源、重新签名并重启输入法。
@@ -73,7 +73,7 @@ npx --yes github:chen86860/wetype-accent#v0.2.0 apply --color '#007AFF'
 需要完全控制深色模式和辅助颜色时，可以分别指定：
 
 ```sh
-npx --yes github:chen86860/wetype-accent#v0.2.0 apply \
+npx --yes wetype-accent@0.2.0 apply \
   --color '#BF5AF2' \
   --dark '#CC7AFF' \
   --secondary '#CF86F7' \
@@ -85,19 +85,19 @@ npx --yes github:chen86860/wetype-accent#v0.2.0 apply \
 查看当前状态：
 
 ```sh
-npx --yes github:chen86860/wetype-accent#v0.2.0 status
+npx --yes wetype-accent@0.2.0 status
 ```
 
 检查资源、代码签名和运行状态：
 
 ```sh
-npx --yes github:chen86860/wetype-accent#v0.2.0 doctor
+npx --yes wetype-accent@0.2.0 doctor
 ```
 
 恢复修改前的腾讯原版应用：
 
 ```sh
-npx --yes github:chen86860/wetype-accent#v0.2.0 restore
+npx --yes wetype-accent@0.2.0 restore
 ```
 
 自动化调用时可以添加 `--yes` 跳过确认。使用 `--app /path/to/WeType.app` 可以检查另一份应用副本。`npx` 只把脚本临时放入 npm 缓存，不会安装全局命令或后台组件。
@@ -216,7 +216,7 @@ codesign --force --deep --sign - \
 由于修改资源会改变应用签名，更新微信输入法前建议先运行：
 
 ```sh
-npx --yes github:chen86860/wetype-accent#v0.2.0 restore
+npx --yes wetype-accent@0.2.0 restore
 ```
 
 然后通过官方安装程序更新，再重新应用颜色。如果新版本资源结构不兼容，工具会拒绝修改并显示错误。
